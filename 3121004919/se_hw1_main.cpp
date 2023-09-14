@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
+#include <map>
+#include <set>
 using namespace std;
 //读取文件中的字符串
 string readsp(ifstream& sp)
@@ -20,45 +22,31 @@ string readsp(ifstream& sp)
 	return ans;
 }
 
-/*
-	计算编辑距离和文本相似度
-	基于编辑距离算法
-	返回浮点小数，1表示完全相同
-*/
-float Countmindis(string t1, string t2)
+//对字符串进行分词，统计分词词频
+map<string,int> StringCut(const string& t)
 {
-	//获取字符串长度
-	int n = t1.size();
-	int m = t2.size();
-	//cout << endl << n << endl << m << endl;
-	//cout << t1 << endl << t2;
-	//有一个字符串为空
-	if (n * m == 0)
-		return 1.0 / (static_cast<float>(n + m) + 1);
-	//初始化dp
-	vector<vector<int>> dp;
-	dp.resize(1, vector<int>(m + 1, 0));
-	for (int i = 0; i < m + 1; i++)
+	map<string, int> m;
+	//每4个字符作为一个分词组
+	for (int i = 0; i < t.size() - 4; i++)
 	{
-		dp[0][i] = i;
+		string temp = t.substr(i, 4);
+		m[temp]++;
 	}
-	int up, left, up_left;
-	for (int i = 1; i < n + 1; i++)
-	{
-		dp.push_back(vector<int>(m + 1, 0));
-		dp[1][0] = i;
-		for (int j = 1; j < m + 1; j++)
-		{
-			up = dp[0][j] + 1;
-			left = dp[1][j - 1] + 1;
-			up_left = dp[0][j - 1] + (t1[i] != t2[j]);
-			dp[1][j] = min({ up,left,up_left });
-		}
-		dp.erase(dp.begin());
-	}
-	return 1.0 / (static_cast<float>(dp[0][m]) + 1);
+	return m;
 }
 
+//计算余弦相似度
+float CosSimilarity(vector<int> v1, vector<int> v2)
+{
+	float x_y = 0, x_x = 0, y_y = 0;
+	for (int i = 0; i < v1.size() and i < v2.size(); i++)
+	{
+		x_y += v1[i] * v2[i];
+		x_x += pow(v1[i], 2);
+		y_y += pow(v2[i], 2);
+	}
+	return x_y / (sqrt(x_x) * sqrt(y_y));
+}
 
 //对各个样例测试
 void testsp(int argc, char** argv)
@@ -85,8 +73,33 @@ void testsp(int argc, char** argv)
 	//读取源文本和模式文本，将其转换为string类型
 	string orig_s = readsp(orig);
 	string orig_add_s = readsp(orig_add);
+	//对两个字符串进行分词
+	auto m1 = StringCut(orig_s);
+	auto m2 = StringCut(orig_add_s);
+	//计算词频
+	vector<int> v1, v2;
+	set<string> s;
+	for (auto i = m1.begin(); i != m1.end(); i++)
+	{
+		s.insert(i->first);
+	}
+	for (auto i = m2.begin(); i != m2.end(); i++)
+	{
+		s.insert(i->first);
+	}
+	for (auto i = s.begin(); i != s.end(); i++)
+	{
+		if (0 == m1.count(*i))
+			v1.push_back(0);
+		else
+		v1.push_back(m1[*i]);
+		if (0 == m2.count(*i))
+			v2.push_back(0);
+		else
+		v2.push_back(m2[*i]);
+	}
 	//求出文本相似度
-	float ans_f = Countmindis(orig_s, orig_add_s);
+	float ans_f = CosSimilarity(v1,v2);
 	//将结果输出到答案文件,结果保留两位小数
 	ans << setiosflags(ios::fixed) << setprecision(2) << "文本相似度为：" << ans_f * 100 << "%";
 	//关闭文件
