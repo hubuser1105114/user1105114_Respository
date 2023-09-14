@@ -27,38 +27,36 @@ string readsp(ifstream& sp)
 */
 float Countmindis(string t1, string t2)
 {
+	//获取字符串长度
 	int n = t1.size();
 	int m = t2.size();
-	cout << n << endl << m << endl;
+	//cout << endl << n << endl << m << endl;
+	//cout << t1 << endl << t2;
 	//有一个字符串为空
 	if (n * m == 0)
 		return 1.0 / (static_cast<float>(n + m) + 1);
 	//初始化dp
 	vector<vector<int>> dp;
-	dp.resize(n + 1);
-	for (int i = 0; i < n + 1; i++)
+	dp.resize(1, vector<int>(m + 1, 0));
+	for (int i = 0; i < m + 1; i++)
 	{
-		dp[i].resize(m + 1, 0);
-		dp[i][0] = i;
+		dp[0][i] = i;
 	}
-	for (int j = 0; j < m + 1; j++)
-	{
-		dp[0][j] = j;
-	}
-	//给dp填空
+	int up, left, up_left;
 	for (int i = 1; i < n + 1; i++)
 	{
+		dp.push_back(vector<int>(m + 1, 0));
+		dp[1][0] = i;
 		for (int j = 1; j < m + 1; j++)
 		{
-			int left = dp[i - 1][j] + 1;
-			int down = dp[i][j - 1] + 1;
-			int ld = dp[i - 1][j - 1];
-			if (t1[i] != t2[j])
-				ld += 1;
-			dp[i][j] = min(ld, min(left, down));
+			up = dp[0][j] + 1;
+			left = dp[1][j - 1] + 1;
+			up_left = dp[0][j - 1] + (t1[i] != t2[j]);
+			dp[1][j] = min({ up,left,up_left });
 		}
+		dp.erase(dp.begin());
 	}
-	return 1.0 / (static_cast<float>(dp[n][m]) + 1);
+	return 1.0 / (static_cast<float>(dp[0][m]) + 1);
 }
 
 
