@@ -9,7 +9,7 @@
 #include <set>
 using namespace std;
 //读取文件中的字符串
-string readsp(ifstream& sp)
+string ReadFile(ifstream& sp)
 {
 	string ans;
 	char ch;
@@ -36,7 +36,7 @@ map<string,int> StringCut(const string& t)
 }
 
 //计算余弦相似度
-float CosSimilarity(vector<int> v1, vector<int> v2)
+float CosSimilarity(const vector<int>& v1,const vector<int>& v2)
 {
 	float x_y = 0, x_x = 0, y_y = 0;
 	for (int i = 0; i < v1.size() and i < v2.size(); i++)
@@ -49,12 +49,12 @@ float CosSimilarity(vector<int> v1, vector<int> v2)
 }
 
 //对各个样例测试
-void testsp(int argc, char** argv)
+void TestSample(const int argc, char** argv)
 {
 	//检查命令行参数
 	if (argc < 2)
 	{
-		cout << "can't open file\n";
+		cout << "can't open file" << endl;
 		return;
 	}
 	//orig为源文件对象，orig_add为抄袭文件对象，ans为答案文件
@@ -71,8 +71,8 @@ void testsp(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 	//读取源文本和模式文本，将其转换为string类型
-	string orig_s = readsp(orig);
-	string orig_add_s = readsp(orig_add);
+	string orig_s = ReadFile(orig);
+	string orig_add_s = ReadFile(orig_add);
 	//对两个字符串进行分词
 	auto m1 = StringCut(orig_s);
 	auto m2 = StringCut(orig_add_s);
@@ -107,7 +107,8 @@ void testsp(int argc, char** argv)
 	orig_add.close();
 	ans.close();
 }
+
 int main(int argc,char* argv[])/*命令行参数*/
 {
-	testsp(argc, argv);
+	TestSample(argc, argv);
 }
